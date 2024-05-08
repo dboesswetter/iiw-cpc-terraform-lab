@@ -6,19 +6,13 @@ data "aws_ssm_parameter" "al2023" {
 
 resource "aws_instance" "default" {
   count         = var.instance_count
-  instance_type = "t3.micro"
+  instance_type = var.instance_type
   ami           = data.aws_ssm_parameter.al2023.value
   key_name      = "vockey"
   tags = {
     Name = "webserver${count.index + 1}"
   }
-  user_data                   = <<EOF
-#!/bin/bash
-
-yum install -y nginx
-systemctl enable nginx
-systemctl start nginx
-EOF
+  user_data                   = file("userdata.sh")
   user_data_replace_on_change = true
   vpc_security_group_ids      = [aws_security_group.instance.id]
 }

@@ -10,11 +10,12 @@ resource "aws_instance" "default" {
   ami           = data.aws_ssm_parameter.al2023.value
   key_name      = "vockey"
   tags = {
-    Name = "webserver${count.index + 1}"
+    Name = "webserver-${terraform.workspace}-${count.index + 1}"
   }
   user_data                   = file("userdata.sh")
   user_data_replace_on_change = true
   vpc_security_group_ids      = [aws_security_group.instance.id]
+  subnet_id                   = data.aws_subnets.default.ids[count.index]
 }
 
 data "aws_vpc" "default" {
@@ -23,7 +24,7 @@ data "aws_vpc" "default" {
 
 # security group for instances
 resource "aws_security_group" "instance" {
-  name   = "webserver"
+  name   = "webserver-${terraform.workspace}"
   vpc_id = data.aws_vpc.default.id
 }
 
@@ -35,7 +36,7 @@ resource "aws_security_group_rule" "egress" {
   from_port         = 0
   to_port           = 0
   cidr_blocks       = ["0.0.0.0/0"]
-  description       = "allow all outbound traffic"
+  description       = "allow all outbound traffic (${terraform.workspace})"
 }
 
 # allow incoming SSH from anywhere
@@ -46,7 +47,7 @@ resource "aws_security_group_rule" "ssh" {
   from_port         = 22
   to_port           = 22
   cidr_blocks       = ["0.0.0.0/0"]
-  description       = "allow SSH connections from anywhere"
+  description       = "allow SSH connections from anywhere (${terraform.workspace})"
 }
 
 # allow the loadbalancer HTTP access to instances
@@ -57,5 +58,5 @@ resource "aws_security_group_rule" "http" {
   from_port                = 80
   to_port                  = 80
   source_security_group_id = aws_security_group.alb.id
-  description              = "allow HTTP from ALB"
+  description              = "allow HTTP from ALB (${terraform.workspace})"
 }

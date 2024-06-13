@@ -66,7 +66,7 @@ resource "aws_lb_target_group" "default" {
   vpc_id   = data.aws_vpc.default.id
 }
 
-resource "aws_lb_target_group_attachment" "test" {
+resource "aws_lb_target_group_attachment" "target_group_attachment" {
   count            = var.instance_count
   target_group_arn = aws_lb_target_group.default.arn
   target_id        = aws_instance.default[count.index].id

@@ -55,8 +55,8 @@ resource "aws_security_group_rule" "http" {
   security_group_id        = aws_security_group.instance.id
   type                     = "ingress"
   protocol                 = "tcp"
-  from_port                = 80
-  to_port                  = 80
+  from_port                = var.http_port
+  to_port                  = var.http_port
   source_security_group_id = aws_security_group.alb.id
   description              = "allow HTTP from ALB (${terraform.workspace})"
 }

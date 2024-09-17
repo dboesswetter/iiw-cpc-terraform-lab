@@ -55,8 +55,30 @@ resource "aws_security_group_rule" "http" {
   security_group_id        = aws_security_group.instance.id
   type                     = "ingress"
   protocol                 = "tcp"
-  from_port                = 80
-  to_port                  = 80
+  from_port                = var.http_port
+  to_port                  = var.http_port
   source_security_group_id = aws_security_group.alb.id
   description              = "allow HTTP from ALB (${terraform.workspace})"
+}
+
+
+
+#### Autoscaling group
+resource "aws_launch_template" "launch_template_564564" {
+  name_prefix   = "launch_template_564564"
+  image_id      = data.aws_ssm_parameter.al2023.value
+  instance_type = var.instance_type
+  user_data = filebase64("userdata.sh")
+}
+
+resource "aws_autoscaling_group" "autoscaling_564546" {
+  max_size = var.instance_count
+  min_size = var.instance_count
+  desired_capacity = var.instance_count
+  vpc_zone_identifier =  data.aws_subnets.default.ids 
+  launch_template {
+    id      = aws_launch_template.launch_template_564564.id
+    version = "$Latest"
+  }
+  target_group_arns = [aws_lb_target_group.default.arn]
 }

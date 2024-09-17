@@ -9,3 +9,12 @@ variable "instance_type" {
   description = "EC2 instance type to use for webservers"
   default     = "t3.micro"
 }
+
+variable "http_port" {
+  type = number
+  default = 80
+}
+
+variable "elb_account_id" {
+  default = "127311923021"
+}
